@@ -10,3 +10,16 @@ Create a new account with the malicious payload as the user's email. The applica
 Note that the inside quotes are escaped.
 ## 3. Exposed Metrics
 The linked documentation for prometheus mentions a directory called `/metrics` as the standard endpoint. Simply naviagte to `localhost:3000/metrics` to reveal metric information and complete the challenge.
+## 4. Missing Encoding
+Inspect the broken image. Find the src link: 
+```
+http://localhost:3000/assets/public/images/uploads/😼-#zatschi-#whoneedsfourlegs-1572600969477.jpg
+```
+Visit this link in your browser. Then, check the Network tab. It will show that the actual visited links reads: 
+```
+http://localhost:3000/assets/public/images/uploads/%F0%9F%98%BC-
+``` 
+which is everything up until the first `#` symbol. The website can render unencoded pound signs, but your browser cannot. Encode each `#` as `%23` to get the solution URL: 
+```
+http://localhost:3000/assets/public/images/uploads/😼-%23zatschi-%23whoneedsfourlegs-1572600969477.jpg
+```
