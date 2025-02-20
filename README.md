@@ -23,3 +23,9 @@ which is everything up until the first `#` symbol. The website can render unenco
 ```
 http://localhost:3000/assets/public/images/uploads/😼-%23zatschi-%23whoneedsfourlegs-1572600969477.jpg
 ```
+## 5. Web3 Sandbox
+Search for `sandbox` in main.js to reveal the path:
+```
+localhost:3000/#/web3-sandbox
+```
+Navigating to this URL solves the challenge.
