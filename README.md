@@ -52,3 +52,14 @@ which is effectively:
 "sql": "SELECT * FROM Users WHERE email = '' OR TRUE"
 ```
 Since this query always return TRUE, the database will return every record. Since the application expects only one user to be returned, it will automatically take the first record from the result set. In this case it will be the admin login. The first user is often the admin because user IDs are usually incremented from 1 and admin accounts are often created first in a database.
+## 7. Admin Section
+Navigate to this URL:
+```
+http://localhost:3000/#/administration
+```
+## 8. Password Strength
+email: `admin@juice-sh.op`
+password: `admin123`
+
+## 9.
+Change the bid to 1 in developer tools -> Session settings. Navigate away from basket and then back to basket.
