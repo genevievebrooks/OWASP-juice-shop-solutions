@@ -61,5 +61,14 @@ http://localhost:3000/#/administration
 email: `admin@juice-sh.op`
 password: `admin123`
 
-## 9.
-Change the bid to 1 in developer tools -> Session settings. Navigate away from basket and then back to basket.
+## 9. View Basket
+Change the `bid` to 1 in developer tools -> Session settings. Navigate away from basket and then back to basket.
+## 10. Empty User Registration
+To solve this challenge you have to modify the client-side javascript. Inspect the "Register" button on the registration page. Find this element in the code:
+```
+<button _ngcontent-jwc-c32="" type="submit" id="registerButton" mat-raised-button="" color="primary" aria-label="Button to complete the registration" class="mat-focus-indicator mat-raised-button mat-button-base mat-primary mat-button-disabled" disabled="true"><span class="mat-button-wrapper"><i _ngcontent-jwc-c32="" class="material-icons"> person_add </i> Register </span><span matripple="" class="mat-ripple mat-button-ripple"></span><span class="mat-button-focus-overlay"></span></button>
+```
+Delete the portion that says `disabled="true"` then click "Register" on the UI.
+## 11. Five-Star Feedback
+This solution requires that you have completed number 6. Login Admin and number 7. Admin Section. Login as the admin and navigate to the admin section (`http://localhost:3000/#/administration`). Click the trash can icon next to the one five-star review.
+
