@@ -72,7 +72,6 @@ Delete the portion that says `disabled="true"` then click "Register" on the UI.
 ## 11. Five-Star Feedback
 This solution requires that you have completed number 6. Login Admin and number 7. Admin Section. Login as the admin and navigate to the admin section (`http://localhost:3000/#/administration`). Click the trash can icon next to the one five-star review.
 ## 12. API Only XSS
-This solution is courtesy of Hacksplained on YouTube. The link to the video is [here](https://www.youtube.com/watch?v=aGjLR4uc0ys&list=PL8j1j35M7wtKXpTBE6V1RlN_pBZ4StKZw&index=20). It requires that you have already solved challenge 6: Login Admin. 
 To find potential vulnerabilities for an API XSS attack, you can search `main.js` for vulnerable functions like `bypassSecurityTrustHtml`. There are a few places in the code where this function is found. One of those places is in the Product Description:
 ```
 trustProductDescription(e) {
@@ -81,7 +80,7 @@ trustProductDescription(e) {
 }
 ```
 This tells us that we should try to replace a product description with the XSS attack payload. Then, when a user opens the product information on the UI, they will get an XSS notification.
- Determining the exact format of the payload takes some tinkering around in with postman and the API. Ultimately, you will need to identify the link for a specific product, for example, the link to the Banana Juice is:
+ Determining the exact format of the payload takes some tinkering around with postman and the API. Ultimately, you will need to identify the link for a specific product, for example, the link to the Banana Juice is:
 ```
 http://localhost:3000/api/Products/6
 ```
@@ -89,4 +88,4 @@ Use a `PUT` request to update the description in the format:
 ```
 {"description":"<iframe src=\"javascript:alert(`xss`)\">"}
 ```
-Note that inner quotes are escaped. The last step is to obtain the correct permissions to update product descriptions. Understandably, customers do not have these permissions, but the admin does. Login as the admin and collect its Bearer token from the developer tools Network tab. Add this to the postman authorization section. Now, the `PUT` request should return a success. Navigating back to the website will complete the challenge. Click on the Banana Juice to see the attack in action.
+After sending the request, refresh the website and the challenge will be solved. Click on the Banana Juice product to see the attack in action.
