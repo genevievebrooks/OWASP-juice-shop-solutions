@@ -1,10 +1,11 @@
 # OWASP-juice-shop-solutions
 This repo holds my solutions for the OWASP Juice Shop challenges
-## 1. Confidential Document
+## Prerequisite Challenges
+### 1. Confidential Document
 Navigate to the "About Us" page. There is a link in the middle of the paragraph that is highlighted green. Click that link and you will be redirected to `localhost:3000/ftp/legal.md`. We want to access the content in this file's parent directory. This can be easily accomplished by changing the URL to `localhost:3000/ftp`. Open the `acquisitions.md` file to complete the challenge.
-## 2. Exposed Metrics
+### 2. Exposed Metrics
 The linked documentation for prometheus mentions a directory called `/metrics` as the standard endpoint. Simply naviagte to `localhost:3000/metrics` to reveal metric information and complete the challenge.
-## 3. Missing Encoding
+### 3. Missing Encoding
 Inspect the broken image. Find the src link: 
 ```
 http://localhost:3000/assets/public/images/uploads/😼-#zatschi-#whoneedsfourlegs-1572600969477.jpg
@@ -17,13 +18,13 @@ which is everything up until the first `#` symbol. The website can render unenco
 ```
 http://localhost:3000/assets/public/images/uploads/😼-%23zatschi-%23whoneedsfourlegs-1572600969477.jpg
 ```
-## 4. Web3 Sandbox
+### 4. Web3 Sandbox
 Search for `sandbox` in main.js to reveal the path:
 ```
 localhost:3000/#/web3-sandbox
 ```
 Navigating to this URL solves the challenge.
-## 5. Login Admin
+### 5. Login Admin
 For this challenge, a SQL injection attack must be used to login without the right credentials. A common approach for these problems is to enter quotes `'` to manipulate the sql query string. Enter `'` as the username and any value as the password and then click login. Inspect the Network tab to see how the client interpreted this login. You should see a line in the response like this:
 ```
 "sql": "SELECT * FROM Users WHERE email = ''' AND password = '098f6bc*****************' AND deletedAt IS NULL"
@@ -46,26 +47,27 @@ which is effectively:
 "sql": "SELECT * FROM Users WHERE email = '' OR TRUE"
 ```
 Since this query always return TRUE, the database will return every record. Since the application expects only one user to be returned, it will automatically take the first record from the result set. In this case it will be the admin login. The first user is often the admin because user IDs are usually incremented from 1 and admin accounts are often created first in a database.
-## 6. Admin Section
+### 6. Admin Section
 Navigate to this URL:
 ```
 http://localhost:3000/#/administration
 ```
-## 7. Password Strength
+### 7. Password Strength
 email: `admin@juice-sh.op`
 password: `admin123`
 
-## 8. View Basket
+### 8. View Basket
 Change the `bid` to 1 in developer tools -> Session settings. Navigate away from basket and then back to basket.
-## 9. Empty User Registration
+### 9. Empty User Registration
 To solve this challenge you have to modify the client-side javascript. Inspect the "Register" button on the registration page. Find this element in the code:
 ```
 <button _ngcontent-jwc-c32="" type="submit" id="registerButton" mat-raised-button="" color="primary" aria-label="Button to complete the registration" class="mat-focus-indicator mat-raised-button mat-button-base mat-primary mat-button-disabled" disabled="true"><span class="mat-button-wrapper"><i _ngcontent-jwc-c32="" class="material-icons"> person_add </i> Register </span><span matripple="" class="mat-ripple mat-button-ripple"></span><span class="mat-button-focus-overlay"></span></button>
 ```
 Delete the portion that says `disabled="true"` then click "Register" on the UI.
-## 10. Five-Star Feedback
+### 10. Five-Star Feedback
 This solution requires that you have completed number 6. Login Admin and number 7. Admin Section. Login as the admin and navigate to the admin section (`http://localhost:3000/#/administration`). Click the trash can icon next to the one five-star review.
-## 11. API Only XSS
+## XSS Attacks
+### 1. API Only XSS
 To find potential vulnerabilities for an API XSS attack, you can search `main.js` for vulnerable functions like `bypassSecurityTrustHtml`. There are a few places in the code where this function is found. One of those places is in the Product Description:
 ```
 trustProductDescription(e) {
@@ -83,7 +85,7 @@ Use a `PUT` request to update the description in the format:
 {"description":"<iframe src=\"javascript:alert(`xss`)\">"}
 ```
 Note that the inner quotes are escaped. After sending the request, refresh the website and the challenge will be solved. Click on the Banana Juice product to see the attack in action.
-## 12. Client-side XSS Protection
+### 2. Client-side XSS Protection
 Similar to the last challenge, this attack involves finding vulnerabilities for an API XSS attack. In the last problem, we found that the API uses `bypassSecurityTrustHtml` for the product description. Upon further investigation, this function is also seen for handling users emails:
 ```
 findAllUsers() {
@@ -108,7 +110,7 @@ Create a new account with the malicious payload as the user's email. The applica
 {"email": "<iframe src=\"javascript:alert(`xss`)\">", "password":""}
 ```
 Note that the inside quotes are escaped.
-## 13. CSP Bypass
+### 3. CSP Bypass
 This challenge can be split into two main parts: loading the malicious payload into the DOM (Document Object Model) and then bypassing the CSP to allow the payload to be executed. Login as any user and navigate to the user profile page. Try loading the malicious payload into the username field. Observe that the `<script>` command is removed, followed by one letter, leaving only `lert(`xss`)</script>`. This tells us that the sanitizer can identify and remove exact html tags. However, a cleverly crafted entry can bypass this naive policy. There are a few ways to do this, here are two of them:
 ```
 `<<script>ascript>alert(`xss`)</script>
@@ -135,13 +137,13 @@ content-security-policy:
 img-src 'self' https://a.png; script-src 'unsafe-inline' 'self' 'unsafe-eval' https://code.getmdl.io http://ajax.googleapis.com;
 ```
 The original policy rules have been overwritten by the malicious ones. Specifically, the addition of `'unsafe-inline'` tells the browser to run any inline code that exists in the DOM. Reload the page to complete the challenge.
-## 14. HTTP-Header XSS
+### 4. HTTP-Header XSS
 The vulnerable page is the Last Login page. We will load the malicious payload into the Last Login IP field. First, ensure that you are logged in, then logout. Search for the `/rest/saveLoginIp` url in the network traffic. This is how the application saves the last login IP address for the next time that you login. Unfortunately, the IP address header isn't shown in the request. Figuring it out is arbitrary. Add this header to the request and then resend it:
 ```
 True-Client-IP: <iframe src="javascript:alert(`xss`)">
 ```
 Login again to complete the challenge.
-## 15. Server-Side XSS Protection
+### 5. Server-Side XSS Protection
 Post a comment that bypasses a vulnerability in the library [sanitize-html version 1.4.2](https://security.snyk.io/package/npm/sanitize-html/1.4.2) (as found in package.json.bak). In particular, this version does not recursively cleanse the input. Therefore, some clever nesting of tags can bypass the library:
 ```
 <<love this juice>iframe src="javascript:alert(`xss`)">
