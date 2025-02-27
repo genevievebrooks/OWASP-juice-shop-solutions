@@ -108,4 +108,10 @@ Create a new account with the malicious payload as the user's email. The applica
 {"email": "<iframe src=\"javascript:alert(`xss`)\">", "password":""}
 ```
 Note that the inside quotes are escaped.
-
+## 13. CSP Bypass
+This challenge can be split into two main parts: loading the malicious payload into the DOM (Document Object Model) and bypassing the CSP to allow the payload to be executed. Login as any user and navigate to the user profile page. Try loading the malicious payload into the username field. Observe that the `<script>` command is removed, followed by one letter, leaving only `lert(`xss`)</script>`. This tells us that the sanitizer can identify and remove exact html tags. However, a cleverly crafted entry can bypass this naive policy. There are a few ways to do this, here are two of them:
+```
+`<<script>ascript>alert(`xss`)</script>
+<<a|ascript>alert(`xss`)</script>
+```
+In each case, the sanitizer removes what it _thinks_ to be the html tag, followed by the next character after it. In the first example that would be `<script>a` and in the second example it is `<a|a`. 
