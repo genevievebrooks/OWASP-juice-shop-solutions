@@ -116,3 +116,9 @@ This challenge can be split into two main parts: loading the malicious payload i
 ```
 In each case, the sanitizer removes what it _thinks_ to be the html tag, followed by the next character after it. In the first example that would be `<script>a` and in the second example it is `<a|a`. 
 Next, we need to bypass the CSP (change it to allow inline Javascript) so the payload can be executed. Open the Network tab of the developer settings. Set your profile picture using a valid image URL and then inspect the network activity. You should see in the `profile` 
+## 14. HTTP-Header XSS
+The vulnerable page is the Last Login page. We will load the malicious payload into the Last Login IP field. First, ensure that you are logged in, then logout. Search for the `/rest/saveLoginIp` url in the network traffic. This is how the application saves the last login IP address for the next time that you login. Unfortunately, the IP address header isn't shown in the request. Figuring it out is arbitrary. Add this header to the request and then resend it:
+```
+True-Client-IP: <iframe src="javascript:alert(`xss`)">
+```
+Login again to complete the challenge.
