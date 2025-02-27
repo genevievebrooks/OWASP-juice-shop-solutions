@@ -115,3 +115,4 @@ This challenge can be split into two main parts: loading the malicious payload i
 <<a|ascript>alert(`xss`)</script>
 ```
 In each case, the sanitizer removes what it _thinks_ to be the html tag, followed by the next character after it. In the first example that would be `<script>a` and in the second example it is `<a|a`. 
+Next, we need to bypass the CSP (change it to allow inline Javascript) so the payload can be executed. Open the Network tab of the developer settings. Set your profile picture using a valid image URL and then inspect the network activity. You should see in the `profile` 
