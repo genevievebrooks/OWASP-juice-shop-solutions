@@ -122,3 +122,8 @@ The vulnerable page is the Last Login page. We will load the malicious payload i
 True-Client-IP: <iframe src="javascript:alert(`xss`)">
 ```
 Login again to complete the challenge.
+## 15. Server-Side XSS Protection
+Post a comment that bypasses a vulnerability in the library sanitize-html version 1.4.2 (as found in package.json.bak). In particular, this version does not recursively cleanse the input. Therefore, some clever nesting of tags can bypass the library:
+```
+<<love this juice>iframe src="javascript:alert(`xss`)">
+```
