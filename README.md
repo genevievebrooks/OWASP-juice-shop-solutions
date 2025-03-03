@@ -158,3 +158,25 @@ Register as a new user and then inspect the Network traffic for `/api/Users/`. R
 ### 2. Deluxe Fraud
 The official guide's solution is [here](https://pwning.owasp-juice.shop/companion-guide/latest/appendix/solutions.html#_obtain_a_deluxe_membership_without_paying_for_it).
 ### 3. Mint the Honey Pot
+### 4. Payback Time
+When you change the quantity of an item in your cart, the network sends a PUT request. You can't buy negative quantities through the UI, but you can do so through direct api access. Change the quantity of any item in your cart. Open the corresponding put request. Copy and resend the request with a negative `quantity` header:
+```
+{"quantity":-4}
+```
+Complete the order by checking out. As ong as your total is negative, you will complete the challenge.
+### 5. Upload Size
+Files are uploaded from the Complaint page. First, inspect how files are uploaded properly by submitting a file less than 100kb. I used [this random file generator from pinetools](https://pinetools.com/random-file-generator). Inspect the Network traffic. You should see a POST to `/file-upload` that contains the file contents. Generate a new file that is between 100bk-200kb. Simply replace the old file content in the POST request with the new file content. You might change the filename as well. Sending this rewuest will comlete the challenge:
+```
+------WebKitFormBoundaryR8YFWOnjdRb8W9EA
+Content-Disposition: form-data; name="file"; filename="110kb.pdf"
+Content-Type: application/pdf
+
+h{À¡&gZÒYÎC¸RvÜ:&ÂdÜ"Ês"Iâ ÆÍæb?
+Û¸OLÜºüDÜ¿6xNc3*5OdlÑòµ®%Ñ·=[%¯Z!Ó©wÏo/1"Ä®¬eV7cGâñAúÙ
+§Ûd¯ÃTaëû%¬xQ"fØUµ!À0?!rÝ~æåÚÅCÀæÏ÷fÇÍP+ö{Ü}SAøf ;AXÎ!
+"¿cãmcHdÊ5:ªï±*SÜ¢xÜ p#©mâë!@AËø¨ò¬^;ÇÔÀ:¬{vf%*Ç!SÜ
+r¿<Mâ«p¢]iÖ0"`ÀTº9Sâ1Vï|MãHÏ·ÆÿÍflsÇ,éEÚ]ÊRã[ÉC2eÙe
+&Ûà¿c/»RîÓ8üÕMØDKUÛOjKäÓeL} ß¡aí»ÝºVoÔF)Ä=oPJe=<fiD7q
+àÖ"+VÉÀè ûBcfl¢¢9·èy'x
+d¸Ø ØÝflJÄì©!ÜahÂwWwAÁÊó |...
+```
