@@ -180,3 +180,23 @@ r¿<Mâ«p¢]iÖ0"`ÀTº9Sâ1Vï|MãHÏ·ÆÿÍflsÇ,éEÚ]ÊRã[ÉC2eÙe
 àÖ"+VÉÀè ûBcfl¢¢9·èy'x
 d¸Ø ØÝflJÄì©!ÜahÂwWwAÁÊó |...
 ```
+### 6. Upload Type
+Copy the file upload POST request from the previous problem. Remove the file extension from the `filename`. Change the `Content-Type` to something different from .pdf or .zip (I used .png). Your request should look similar to this:
+```
+------WebKitFormBoundaryR8YFWOnjdRb8W9EA
+Content-Disposition: form-data; name="file"; filename="50kb"
+Content-Type: application/png
+
+ÎÚk 0'wÚ&9>JoX »1gø§áflÿÌ::è©|
+jã^ô)èùp5>ì+ÚÔ3vhk£Æf+oLIóö(eÀQ%úÓár58µvSèøëÁçáI`ö&})E!)m0Ç
+À'õ¯GG)oSHª ç¥Ä~0
+Å¥¢,økS£<Zr>¿»aNUËÊ }l¸§5ÇÆ{HEj+Úâ0m¨WÝlÔbÆ
+dèT«Â®ò!/ñÛ[:
+dãEYhæ7fpdÜXüîº©.2:¡ íÒö®d!pe¬0Nõ¶vTÉíváCe0ÜE'
+%ê.íÑù¨6!6»HJçûÀÏkm"1ÊHäPåiMöUÕ
+&A:{ÍÙ¸ÖIo0 'k4"dø©|RD&¿ÑNÍàÉA6Ã¨ÏÏáôúâmØÂ2ÂóûÊØI+6®ÛÄS +{
+Í?!Û"¡ñ:V/zx} Ã¨º«&`ÚaÛª(Á\OÄNÇ%Ëé*¢Q9G/k
+SZ7FèÚ Éæ
+ÀÛÚIÄ¬"ÊSVÀÇò...
+```
+### 7. Expired Coupon
