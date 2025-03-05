@@ -200,3 +200,63 @@ SZ7FèÚ Éæ
 ÀÛÚIÄ¬"ÊSVÀÇò...
 ```
 ### 7. Expired Coupon
+Start by looking for keywords in the source code like `coupon` and `campaign`. In main.js you will find a section of past campaigns with their respective coupon codes and the date that they were valid on:
+```
+this.campaigns = {
+    WMNSDY2019: {
+        validOn: 15519996e5,
+        discount: 75
+    },
+    WMNSDY2020: {
+        validOn: 1583622e6,
+        discount: 60
+    },
+    WMNSDY2021: {
+        validOn: 1615158e6,
+        discount: 60
+    },
+    WMNSDY2022: {
+        validOn: 1646694e6,
+        discount: 60
+    },
+    WMNSDY2023: {
+        validOn: 167823e7,
+        discount: 60
+    },
+    ORANGE2020: {
+        validOn: 15885468e5,
+        discount: 50
+    },
+    ORANGE2021: {
+        validOn: 16200828e5,
+        discount: 40
+    },
+    ORANGE2022: {
+        validOn: 16516188e5,
+        discount: 40
+    },
+    ORANGE2023: {
+        validOn: 16831548e5,
+        discount: 40
+    }
+}
+```
+The `validOn` variable is a date that has been transformed in some way. Find the code which handles the coupon validiation:
+```
+applyCoupon() {
+      this.campaignCoupon = this.couponControl.value,
+      this.clientDate = new Date;
+      const e = 60 * (this.clientDate.getTimezoneOffset() + 60) * 1e3;
+      this.clientDate.setHours(0, 0, 0, 0),
+      this.clientDate = this.clientDate.getTime() - e,
+      sessionStorage.setItem("couponDetails", `${this.campaignCoupon}-${this.clientDate}`);
+      const o = this.campaigns[this.couponControl.value];
+      o ? this.clientDate === o.validOn ? this.showConfirmation(o.discount) : (this.couponConfirmation = void 0,
+      this.translate.get("INVALID_COUPON").subscribe(a => {
+          this.couponError = {
+              error: a
+          }
+      } ...
+```
+The first five coupons are clearly for Women's Day -- March 8th -- but you could also do some reverse engineering to figure that out. The validation code takes the client date which comes from your computer. Change your computer's date to March 8, 2019 and then redeem the coupon code `WMNSDY2019`. It should be valid and a 75% discount on your basket total will be reflected. Complete the checkout process to solve the challenge.
+It's important to note that this attack is possible only because the client is being hosted locally. If this were hosted on a private server, like all websites on the internet, then the client would get the date from the server. 
