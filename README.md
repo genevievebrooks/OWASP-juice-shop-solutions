@@ -260,3 +260,8 @@ applyCoupon() {
 ```
 The first five coupons are clearly for Women's Day -- March 8th -- but you could also do some reverse engineering to figure that out. The validation code takes the client date which comes from your computer. Change your computer's date to March 8, 2019 and then redeem the coupon code `WMNSDY2019`. It should be valid and a 75% discount on your basket total will be reflected. Complete the checkout process to solve the challenge.
 It's important to note that this attack is possible only because the client is being hosted locally. If this were hosted on a private server, like all websites on the internet, then the client would get the date from the server. 
+### 8. Poison Null Byte
+This problem was pretty tricky, especially considering that the official solution is incorrect for more recent versions of the project. Start off by researching the poison null byte technique. It should become apparent that we will be working with the `/ftp` directory from the Confidential Document challenge. Navigate to this directory and try to open different files. If you try to open files not of type `.md` or `.pdf` then the browser will raise a file type Error (For some reason, `incident-support.kdbx` does not follow this rule). To access these restricted files, change the URL accordingly:
+```
+http://localhost:3000/ftp/eastere.gg%2500.md
+http://localhost:3000/ftp/coupons_2013.md.bak%2500.md
