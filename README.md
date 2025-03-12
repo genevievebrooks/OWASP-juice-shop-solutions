@@ -282,11 +282,11 @@ which then becomes:
     models.sequelize.query(`SELECT * FROM Users WHERE email = '${jim@juice-sh.op'-- || ''}' AND password = '${security.hash(req.body.password || '')}' AND deletedAt IS NULL`, { model: UserModel, plain: true })
 ```
 ### 2. Database Schema
-For this challenge, the hacker must utilize injection to pass some query that returns the schema definition. First, identify that the application usews a SQLite database. This is documented in the [architecture overview](https://pwning.owasp-juice.shop/companion-guide/latest/introduction/architecture.html). Look up the query to get the schema definition for a SQLite database (I used Chat-GPT) and it should be something like this:
+For this challenge, the hacker must utilize injection to pass some query that returns the schema definition. First, identify that the application uses a SQLite database. This is documented in the [architecture overview](https://pwning.owasp-juice.shop/companion-guide/latest/introduction/architecture.html). Look up the query to get the schema definition for a SQLite database (I used Chat-GPT) and it should be something like this:
 ```
-SELECT sql FROM sqlite_master WHERE type IN ('table', 'index', 'view', 'trigger');
+SELECT sql FROM sqlite_master;
 ```
-Now we have an idea of what the malicious payload will need to look like. Next, identify a place to inject sql queries. The obvious choice is the search bar because it pulls matching product records from the SQLite database. Messing around with the search bar UI doesn't provide any information about an injection attack being possible, let alone how the underlying query is structured. Instead, inspect the network traffic to find the corresponding GET request:
+Now, we have an idea of what the malicious payload will need to look like. Next, identify a place to inject sql queries. The obvious choice is the search bar because it pulls matching product records from the SQLite database. Messing around with the search bar UI doesn't provide any information about an injection attack being possible, let alone how the underlying query is structured. Instead, inspect the network traffic to find the corresponding GET request:
 ```
 GET /rest/products/search?q= HTTP/1.1
 ```
@@ -307,9 +307,9 @@ Now the underlying query has been exposed and we can easily craft a malicious un
 SELECT * FROM Products WHERE ((name LIKE '%')) UNION SELECT sql FROM sqlite_master;--%' OR description LIKE '%<input>%') AND deletedAt IS NULL) ORDER BY name"
 ```
 Therefore, `q=')) UNION SELECT sql FROM sqlite_master;--`
-Make sure to URL encode the query before sending it as a request:
+Make sure to URL encode q before sending it as a request:
 ```
-'))%20UNION%20SELECT%20sql%20FROM%20sqlite_master;--
+q='))%20UNION%20SELECT%20sql%20FROM%20sqlite_master;--
 ```
 You should get this error in the response:
 ```
