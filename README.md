@@ -345,7 +345,7 @@ Note that the `id` is `10`. Next, add any product to the basket using the UI. In
  "quantity":1
 }
 ```
-Replace the `id` with that of the Christmas Special and then repeat the request:
+Replace the `ProductId` with that of the Christmas Special and then repeat the request:
 ```
 {
  "ProductId":10,
